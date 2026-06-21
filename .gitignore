@@ -1,0 +1,23 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Environment / secrets
+.env
+*.env.local
+
+# Qdrant local storage (not part of the repo — this is runtime data)
+qdrant_storage/
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
