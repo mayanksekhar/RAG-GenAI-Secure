@@ -13,6 +13,7 @@ sast-semgrep:
   stage: security
   image: python:3.12-slim
   before_script:
+    - pip install --upgrade pip --quiet
     - pip install semgrep --quiet
   script:
     - echo "Running SAST scan with Semgrep..."
@@ -29,6 +30,7 @@ sca-pip-audit:
   stage: security
   image: python:3.12-slim
   before_script:
+    - pip install --upgrade pip --quiet
     - pip install pip-audit --quiet
     - pip install -r requirements.txt --quiet
   script:
