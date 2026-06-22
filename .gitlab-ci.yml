@@ -1,0 +1,43 @@
+stages:
+  - test
+  - security
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+
+sast-semgrep:
+  stage: security
+  image: python:3.12-slim
+  before_script:
+    - pip install semgrep --quiet
+  script:
+    - echo "Running SAST scan with Semgrep..."
+    - semgrep scan --config=auto src/ --json > semgrep-report.json || true
+    - semgrep scan --config=auto src/ 2>&1 | tail -5
+  artifacts:
+    when: always
+    paths:
+      - semgrep-report.json
+    expire_in: 30 days
+  allow_failure: false
+
+sca-pip-audit:
+  stage: security
+  image: python:3.12-slim
+  before_script:
+    - pip install pip-audit --quiet
+    - pip install -r requirements.txt --quiet
+  script:
+    - echo "Running SCA scan with pip-audit..."
+    - pip-audit --format json > pip-audit-report.json || true
+    - pip-audit 2>&1
+  artifacts:
+    when: always
+    paths:
+      - pip-audit-report.json
+    expire_in: 30 days
+  allow_failure: false
