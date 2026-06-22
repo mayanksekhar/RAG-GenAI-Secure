@@ -13,6 +13,7 @@ from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
 from qdrant_client import QdrantClient
 from sanitizer import sanitize_chunks
+from output_scanner import scan_output
 
 OLLAMA_BASE_URL = "http://localhost:11434"
 QDRANT_URL = "http://localhost:6333"
@@ -81,9 +82,16 @@ def main():
     print("\nAsking llama3 ...\n")
     response = llm.complete(prompt)
 
+    redacted, findings = scan_output(response.text.strip())
+    if findings:
+        for f in findings:
+            print(f"  [DLP] {f}")
     print("--- ANSWER ---")
-    print(response.text.strip())
+    print(redacted)
 
 
 if __name__ == "__main__":
     main()
+
+def _patched_main():
+    pass
