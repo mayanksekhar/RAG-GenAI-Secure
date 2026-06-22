@@ -12,6 +12,7 @@ import sys
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
 from qdrant_client import QdrantClient
+from sanitizer import sanitize_chunks
 
 OLLAMA_BASE_URL = "http://localhost:11434"
 QDRANT_URL = "http://localhost:6333"
@@ -69,6 +70,7 @@ def main():
 
     print(f"Retrieving top {TOP_K} chunks ...")
     chunks = retrieve(question, client, embed_model)
+    chunks = sanitize_chunks(chunks)
     for i, chunk in enumerate(chunks, start=1):
         source = chunk.payload.get("source_file", "unknown")
         preview = chunk.payload.get("text", "")[:80].replace("\n", " ")
