@@ -1,0 +1,67 @@
+name: Security Scans
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  sast-semgrep:
+    name: SAST — Semgrep
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Semgrep
+        run: pip install --upgrade pip && pip install semgrep
+
+      - name: Run Semgrep SAST scan
+        run: |
+          semgrep scan --config=auto src/ --json > semgrep-report.json || true
+          semgrep scan --config=auto src/ 2>&1 | tail -5
+
+      - name: Upload Semgrep report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: semgrep-report
+          path: semgrep-report.json
+          retention-days: 30
+
+  sca-pip-audit:
+    name: SCA — pip-audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pip-audit
+          pip install -r requirements.txt
+
+      - name: Run pip-audit SCA scan
+        run: |
+          pip-audit --format json > pip-audit-report.json || true
+          pip-audit 2>&1
+
+      - name: Upload pip-audit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pip-audit-report
+          path: pip-audit-report.json
+          retention-days: 30
