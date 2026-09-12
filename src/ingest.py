@@ -15,6 +15,7 @@ from llama_index.core.node_parser import SentenceSplitter
 from llama_index.embeddings.ollama import OllamaEmbedding
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, PointStruct, VectorParams
+from access_control import classify_document
 
 SOURCE_DIR = "data/source_docs"
 OLLAMA_BASE_URL = "http://localhost:11434"
@@ -71,6 +72,7 @@ def embed_and_upsert(nodes, client: QdrantClient, embed_model: OllamaEmbedding):
                 payload={
                     "text": node.text,
                     "source_file": source_file,
+                    "classification": classify_document(source_file),
                 },
             )
         )
