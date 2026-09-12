@@ -10,10 +10,10 @@
 
 | Severity | Total | Open | Mitigated | Accepted |
 |---|---|---|---|---|
-| High | 10 | 6 | 3 | 1 |
-| Medium | 7 | 5 | 0 | 2 |
+| High | 11 | 6 | 4 | 1 |
+| Medium | 8 | 5 | 0 | 3 |
 | Low | 1 | 1 | 0 | 0 |
-| **Total** | **18** | **12** | **3** | **3** |
+| **Total** | **20** | **12** | **4** | **4** |
 
 ---
 
@@ -36,6 +36,8 @@
 | SCA-003 | pip-audit (CI) | pip 25.0.1 | CVE-2026-3219 | High | Mitigated | pip upgraded to 26.1.2 in CI pipeline |
 | SCA-004 | pip-audit (CI) | pip 25.0.1 | CVE-2026-6357 | High | Mitigated | pip upgraded to 26.1.2 in CI pipeline |
 | SCA-005 | pip-audit (CI) | pip 25.0.1 | PYSEC-2026-196 | High | Mitigated | pip upgraded to 26.1.2 in CI pipeline |
+| SCA-006 | pip-audit (Sep 2026 re-scan) | Dependencies | 105 CVEs across 7 packages (aiohttp, banks, h2, nltk, pillow, pypdf, setuptools) | High | Mitigated | Upgraded all 7 packages; 104 resolved |
+| SCA-007 | pip-audit (Sep 2026 re-scan) | nltk 3.10.3 | PYSEC-2026-3740 — no fix version available upstream | Medium | Accepted | No vendor patch exists; monitor for future release |
 | SAST-000 | Semgrep | src/ | Zero findings across 290 rules | Info | Closed | Clean result — no dangerous patterns in source code |
 | TM-011 | Threat Model | Docker | Qdrant container has no resource limits | Low | Open | Add --memory and --cpus limits to docker run command |
 | TM-012 | Threat Model | All components | No secrets management — API keys hardcoded if added | Medium | Open | Use environment variables or a secrets manager for any future API keys |
