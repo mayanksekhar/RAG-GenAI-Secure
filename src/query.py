@@ -12,6 +12,8 @@ import sys
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
 from qdrant_client import QdrantClient
+from qdrant_client.models import Filter, FieldCondition, MatchAny
+from access_control import get_user_role, get_allowed_classifications
 from sanitizer import sanitize_chunks
 from output_scanner import scan_output
 
@@ -30,11 +32,20 @@ SYSTEM_PROMPT = (
 )
 
 
-def retrieve(question: str, client: QdrantClient, embed_model: OllamaEmbedding):
+def retrieve(question: str, client: QdrantClient, embed_model: OllamaEmbedding, allowed_classifications: set):
     query_vector = embed_model.get_text_embedding(question)
+    access_filter = Filter(
+        must=[
+            FieldCondition(
+                key="classification",
+                match=MatchAny(any=list(allowed_classifications)),
+            )
+        ]
+    )
     results = client.query_points(
         collection_name=COLLECTION_NAME,
         query=query_vector,
+        query_filter=access_filter,
         limit=TOP_K,
     ).points
     return results
@@ -57,11 +68,16 @@ def build_prompt(question: str, chunks) -> str:
 
 
 def main():
-    if len(sys.argv) < 2:
-        print('Usage: python src/query.py "your question here"')
+    if len(sys.argv) < 3 or sys.argv[1] != "--user":
+        print('Usage: python src/query.py --user <username> "your question here"')
         sys.exit(1)
 
-    question = sys.argv[1]
+    username = sys.argv[2]
+    question = sys.argv[3]
+
+    role = get_user_role(username)
+    allowed = get_allowed_classifications(role)
+    print(f"User: {username} (role: {role}) — allowed classifications: {allowed}\n")
 
     client = QdrantClient(url=QDRANT_URL)
     embed_model = OllamaEmbedding(model_name=EMBED_MODEL, base_url=OLLAMA_BASE_URL)
@@ -70,7 +86,7 @@ def main():
     print(f"Question: {question}\n")
 
     print(f"Retrieving top {TOP_K} chunks ...")
-    chunks = retrieve(question, client, embed_model)
+    chunks = retrieve(question, client, embed_model, allowed)
     chunks = sanitize_chunks(chunks)
     for i, chunk in enumerate(chunks, start=1):
         source = chunk.payload.get("source_file", "unknown")
